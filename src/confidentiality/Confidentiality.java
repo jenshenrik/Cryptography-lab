@@ -1,19 +1,26 @@
 package confidentiality;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.NoSuchPaddingException;
+
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 public class Confidentiality {
 
 	Cipher c;
-	SecretKeySpec k;
+	SecretKeySpec factory;
+	SecretKey key;
 	
 	public Confidentiality(byte[] key) {
 		try {
 			c = Cipher.getInstance("AES");
-			k = new SecretKeySpec(key, "AES");
+			factory = new SecretKeySpec(key, "AES");
 		} catch (NoSuchAlgorithmException e) {
 			System.out.println(e);
 			System.exit(1);
@@ -23,15 +30,13 @@ public class Confidentiality {
 		}
 	}
 	
-	/*
-	public byte[] encrypt(byte[] data) {
-		c.init(Cipher.ENCRYPT_MODE, k);
+	public byte[] encrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		c.init(Cipher.ENCRYPT_MODE, factory);
 		return c.doFinal(data);
 	}
 	
-	public byte[] decrypt(byte[] data) {
-		c.init(Cipher.DECRYPT_MODE, k);
+	public byte[] decrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		c.init(Cipher.DECRYPT_MODE, factory);
 		return c.doFinal(data);
 	}
-	*/
 }

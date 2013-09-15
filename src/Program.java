@@ -1,3 +1,4 @@
+import java.security.InvalidKeyException;
 import java.util.Scanner;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -12,13 +13,16 @@ import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+
 import confidentiality.Confidentiality;
 
 public class Program {
 	
-	public String action;
-	public String inputPath;
-	public String outputPath;
+	private String action;
+	private String inputPath;
+	private String outputPath;
 	
 	private byte[] key;
 	
@@ -38,34 +42,67 @@ public class Program {
 
 		Program p = new Program();
 		
-		p.action = "e"; //args[0];
-		p.inputPath = "input"; //args[1];
-		p.outputPath = "output"; //args[2];
+		p.action = "d"; //args[0];
+		p.inputPath = "output"; //args[1];
+		//p.outputPath = "output"; //args[2];
 	
 		p.run();
 	}
 
-	public void run() {
-		//key = getInput("Please enter symmetric key:").getBytes();
+	private void run() {
+		key = getInput("Please enter symmetric key:").getBytes();
+		if (action.equals("e")) {
+			encrypt(key);
+		} else {
+			decrypt(key);
+		}
+	}
+	
+	private void decrypt(byte[] key) {
 		try {
+			Confidentiality con = new Confidentiality(key);
 			byte[] data = readFile(inputPath);
-			writeFile(data);
+			String result = new String(con.decrypt(data));
+			System.out.println(result);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public String getInput(String msg) {
+	private void encrypt(byte[] key) {
+		try {
+			byte[] data = readFile(inputPath);
+			Confidentiality con = new Confidentiality(key);
+			byte[] encrypted = con.encrypt(data);
+			writeFile(encrypted);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String getInput(String msg) {
 		System.out.println(msg);
 		Scanner in = new Scanner(System.in);
 		return in.next();
 	}
 
-	public byte[] readFile(String path) throws IOException {
+	private byte[] readFile(String path) throws IOException {
 		return Files.readAllBytes(Paths.get(path));
 	}
 
-	public void writeFile(byte[] data) throws IOException {
+	private void writeFile(byte[] data) throws IOException {
 		Files.write(Paths.get(outputPath), data, StandardOpenOption.WRITE);
 	}
 }
