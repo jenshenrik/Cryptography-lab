@@ -3,19 +3,16 @@ package confidentiality;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.NoSuchPaddingException;
 
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 public class Confidentiality {
 
 	Cipher c;
 	SecretKeySpec factory;
-	SecretKey key;
 	
 	public Confidentiality(byte[] key) {
 		try {

@@ -1,15 +1,7 @@
 import java.security.InvalidKeyException;
 import java.util.Scanner;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.BufferedOutputStream;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
@@ -95,7 +87,9 @@ public class Program {
 	private String getInput(String msg) {
 		System.out.println(msg);
 		Scanner in = new Scanner(System.in);
-		return in.next();
+		String reply = in.next();
+		in.close();
+		return reply;
 	}
 
 	private byte[] readFile(String path) throws IOException {
