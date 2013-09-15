@@ -44,7 +44,7 @@ public class Program {
 		
 		p.action = "d"; //args[0];
 		p.inputPath = "output"; //args[1];
-		//p.outputPath = "output"; //args[2];
+		p.outputPath = "output"; //args[2];
 	
 		p.run();
 	}
