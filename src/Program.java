@@ -20,23 +20,18 @@ public class Program {
 	
 	public static void main(String args[]) {
 		// Check for parameters
-//		if (args.length != 3) {
+//		if (args.length != 1) {
 //			System.out.println(
-//					"Usage:\n\n$>java Enryption <action> <input> <output>\n\n" +
-//					" -action:\t'e' for encrypt or 'd' for decrypt\n" +
-//					" -input:\tpath to input file\n" +
-//					" -output:\tpath to output file\n");
-//			//System.exit(0);
-//			args[0] = "e";
-//			args[1] = "input";
-//			args[2] = "output";
+//					"Usage:\n\n$>java Enryption <action>\n\n" +
+//					" -action: 'e' for encrypt or 'd' for decrypt\n");
+//			System.exit(0);;
 //		}
 
 		Program p = new Program();
 		
 		p.action = "d"; //args[0];
-		p.inputPath = "output"; //args[1];
-		p.outputPath = "output"; //args[2];
+		p.inputPath = "plaintext.txt";
+		p.outputPath = "ciphertext.txt";
 	
 		p.run();
 	}
@@ -97,6 +92,6 @@ public class Program {
 	}
 
 	private void writeFile(byte[] data) throws IOException {
-		Files.write(Paths.get(outputPath), data, StandardOpenOption.WRITE);
+		Files.write(Paths.get(outputPath), data, StandardOpenOption.CREATE);
 	}
 }
