@@ -1,3 +1,4 @@
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.util.Scanner;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.nio.file.StandardOpenOption;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.ShortBufferException;
 
 import confidentiality.Confidentiality;
 
@@ -29,7 +31,7 @@ public class Program {
 
 		Program p = new Program();
 		
-		p.action = "d"; //args[0];
+		p.action = "e"; //args[0];
 		p.inputPath = "plaintext.txt";
 		p.outputPath = "ciphertext.txt";
 	
@@ -59,6 +61,11 @@ public class Program {
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			e.printStackTrace();
+		} catch (ShortBufferException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -75,6 +82,11 @@ public class Program {
 		} catch (IllegalBlockSizeException e) {
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidAlgorithmParameterException e) {
+			e.printStackTrace();
+		} catch (ShortBufferException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
