@@ -1,109 +1,93 @@
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.util.Scanner;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
-
-import confidentiality.Confidentiality;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 
 public class Program {
 	
-	private String action;
 	private String inputPath;
-	private String outputPath;
 	
-	private byte[] key;
+	private Cipher symCipher;
+	private Cipher asymCipher;
+	private Key key;
+	private KeyPair keyPair;
 	
 	public static void main(String args[]) {
-		// Check for parameters
-//		if (args.length != 1) {
-//			System.out.println(
-//					"Usage:\n\n$>java Enryption <action>\n\n" +
-//					" -action: 'e' for encrypt or 'd' for decrypt\n");
-//			System.exit(0);;
-//		}
-
 		Program p = new Program();
 		
-		p.action = "e"; //args[0];
 		p.inputPath = "plaintext.txt";
-		p.outputPath = "ciphertext.txt";
 	
-		p.run();
+		try {
+			p.run();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void run() {
-		key = getInput("Please enter symmetric key:").getBytes();
-		if (action.equals("e")) {
-			encrypt(key);
-		} else {
-			decrypt(key);
-		}
+	private void init() throws Exception {
+		// Generate symmetric key, and setup cipher
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(256);
+	    key = keyGen.generateKey();	    
+	    symCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+
+	    // Generate asymmetric key, and setup cipher
+	    KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+		keyPairGen.initialize(1024);
+		keyPair = keyPairGen.generateKeyPair();
+		asymCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 	}
 	
-	private void decrypt(byte[] key) {
-		try {
-			Confidentiality con = new Confidentiality(key);
-			byte[] data = readFile(inputPath);
-			String result = new String(con.decrypt(data));
-			System.out.println(result);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		} catch (BadPaddingException e) {
-			e.printStackTrace();
-		} catch (InvalidAlgorithmParameterException e) {
-			e.printStackTrace();
-		} catch (ShortBufferException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private void run() throws Exception {
+		init();
+
+		// Read file 
+		byte[] plainText = readFile(inputPath);
+	    System.out.println("Encrypting plaintext:\t" + new String(plainText, "UTF8"));
+	    
+	    // Encrypt plaintext
+	    byte[] cipherText = encrypt(plainText);
+	    System.out.println("Ciphertext:\t\t" + new String(cipherText, "UTF8") );
+	    
+	    // Sign ciphertext using private key
+	    byte[] signed = sign(cipherText);
+	    System.out.println("Signed ciphertext:\t" + new String(signed, "UTF8"));
+	    
+	    // Verify signed ciphertext using public key
+	    byte[] verified = verify(signed);
+	    
+	    // Decrypt ciphertext
+	    byte[] decrypted = decrypt(verified);
+	    System.out.println("Decrypted ciphertext:\t" + new String(decrypted, "UTF8"));
 	}
 	
-	private void encrypt(byte[] key) {
-		try {
-			byte[] data = readFile(inputPath);
-			Confidentiality con = new Confidentiality(key);
-			byte[] encrypted = con.encrypt(data);
-			writeFile(encrypted);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			e.printStackTrace();
-		} catch (BadPaddingException e) {
-			e.printStackTrace();
-		} catch (InvalidAlgorithmParameterException e) {
-			e.printStackTrace();
-		} catch (ShortBufferException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private byte[] sign(byte[] data) throws Exception {
+		asymCipher.init(Cipher.ENCRYPT_MODE, keyPair.getPrivate());
+		return asymCipher.doFinal(data);
 	}
 	
-	private String getInput(String msg) {
-		System.out.println(msg);
-		Scanner in = new Scanner(System.in);
-		String reply = in.next();
-		in.close();
-		return reply;
+	private byte[] verify(byte[] data) throws Exception {
+		asymCipher.init(Cipher.DECRYPT_MODE, keyPair.getPublic());
+		return asymCipher.doFinal(data);
+	}
+	
+	private byte[] decrypt(byte[] cipherText) throws Exception {
+		symCipher.init(Cipher.DECRYPT_MODE, key);
+	    return symCipher.doFinal(cipherText);
+	}
+	
+	private byte[] encrypt(byte[] plainText) throws Exception {
+		symCipher.init(Cipher.ENCRYPT_MODE, key);
+	    return symCipher.doFinal(plainText);
+	    
 	}
 
 	private byte[] readFile(String path) throws IOException {
 		return Files.readAllBytes(Paths.get(path));
-	}
-
-	private void writeFile(byte[] data) throws IOException {
-		Files.write(Paths.get(outputPath), data, StandardOpenOption.CREATE);
 	}
 }
